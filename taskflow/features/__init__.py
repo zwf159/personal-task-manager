@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from ..store import ValidationError
 
-MODULES = ['projects', 'trash', 'labels']
+MODULES = ['projects', 'trash', 'labels', 'checklists']
 UNHANDLED = object()
 
 

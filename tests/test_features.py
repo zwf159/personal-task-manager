@@ -32,6 +32,16 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_checklist_cannot_modify_another_tasks_item(self):
+        a, b = self.task(), self.task()
+        path = f"/api/tasks/{a['id']}/checklist"
+        item = self.call('POST', path, {'title': '第一步'})
+        updated = self.call('PATCH', f"{path}/{item['id']}", {'done': True})
+        self.assertEqual(updated['done'], 1)
+        with self.assertRaises(NotFoundError):
+            self.call('PATCH', f"/api/tasks/{b['id']}/checklist/{item['id']}", {'done': True})
+        self.assertEqual(len(self.call('GET', path)), 1)
+
     def test_labels_assignment_is_atomic(self):
         task = self.task()
         label = self.call('POST', '/api/labels', {'name': '重要'})
