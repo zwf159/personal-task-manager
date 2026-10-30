@@ -1,0 +1,6 @@
+.review-card { border-top: 4px solid #a693bf; }
+.review-metrics { background: #f4f0f8; padding: 12px; border-radius: 7px; }
+.reviews-panel .inline-form label:has(textarea) { flex-basis: 100%; }
+.reviews-panel textarea { min-height: 100px; }
+.reviews-panel .action-strip { padding-top: 12px; }
+@media (max-width: 720px) { .review-metrics { font-size: 11px; } }
