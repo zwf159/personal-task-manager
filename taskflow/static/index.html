@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>拾序 Taskflow · 个人任务管理</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="拾序首页"><span class="logo">拾</span><span>拾序<small>TASKFLOW</small></span></a>
+    <p class="nav-caption">我的空间</p>
+    <nav id="views" aria-label="任务视图">
+      <button data-view="all" class="active"><span>▦</span> 全部任务</button>
+      <button data-view="today"><span>◷</span> 今天到期</button>
+      <button data-view="overdue"><span>◴</span> 已逾期</button>
+    </nav>
+    <div class="project-heading"><p class="nav-caption">项目分组</p><button id="add-project" class="icon-button" aria-label="新建项目">＋</button></div>
+    <div id="projects"></div>
+    <div class="sidebar-footer"><span class="status-dot"></span> 本地个人空间<small>整理思绪，一件件完成。</small></div>
+  </aside>
+  <main>
+    <header><div class="eyebrow">让每一步，都有方向</div><div class="title-line"><div><h1 id="view-title">全部任务</h1><p id="subtitle">把想做的事，变成完成的事。</p></div><button id="new-task" class="primary">＋ 新建任务</button></div></header>
+    <section class="stats" aria-label="任务统计">
+      <article><span>全部任务</span><strong id="stat-total">0</strong><small>记录每一个想法</small></article>
+      <article><span>进行中</span><strong id="stat-doing">0</strong><small>专注眼前的一步</small></article>
+      <article><span>已完成</span><strong id="stat-done">0</strong><small>每一点进步都算数</small></article>
+      <article class="accent-stat"><span>完成进度</span><strong id="stat-progress">0%</strong><progress id="progress" value="0" max="100">0%</progress></article>
+    </section>
+    <section class="workspace" aria-label="任务列表">
+      <div class="toolbar"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="搜索任务名称或备注" aria-label="搜索任务"></label><div class="filters"><select id="status" aria-label="筛选状态"><option value="">全部状态</option><option value="todo">待开始</option><option value="doing">进行中</option><option value="done">已完成</option></select><select id="priority" aria-label="筛选优先级"><option value="">全部优先级</option><option value="high">高优先级</option><option value="medium">中优先级</option><option value="low">低优先级</option></select><a id="export" class="secondary" href="/api/export.csv">↓ 导出 CSV</a></div></div>
+      <div class="list-heading"><span>任务内容</span><span id="result-count">0 项任务</span></div>
+      <div id="task-list" aria-live="polite"></div>
+      <div id="empty" class="empty" hidden><div>✓</div><h2>给新的一步，留个位置</h2><p>这里还没有匹配的任务。创建一项任务，或调整筛选条件。</p><button id="empty-create" class="secondary">创建任务</button></div>
+    </section>
+    <footer>拾序 · 从一件小事开始 <span>数据仅保存在本机</span></footer>
+  </main>
+  <dialog id="task-dialog"><form id="task-form"><div class="dialog-heading"><h2 id="dialog-title">新建任务</h2><button type="button" class="icon-button close-dialog" aria-label="关闭">×</button></div><input name="id" type="hidden"><label>任务名称 <span class="required">*</span><input name="title" required maxlength="200" placeholder="下一步，你想完成什么？"></label><label>备注<textarea name="notes" rows="4" maxlength="5000" placeholder="补充细节，让行动更清晰"></textarea></label><div class="form-grid"><label>所属项目<select name="project_id"><option value="">未分组</option></select></label><label>截止日期<input name="due_date" type="date" min="0001-01-01" max="9999-12-31"></label><label>优先级<select name="priority"><option value="medium">中优先级</option><option value="high">高优先级</option><option value="low">低优先级</option></select></label><label>状态<select name="status"><option value="todo">待开始</option><option value="doing">进行中</option><option value="done">已完成</option></select></label></div><p class="form-error" id="task-error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary close-dialog">取消</button><button type="submit" class="primary">保存任务</button></div></form></dialog>
+  <dialog id="project-dialog"><form id="project-form"><div class="dialog-heading"><h2>新建项目</h2><button type="button" class="icon-button close-dialog" aria-label="关闭">×</button></div><label>项目名称<input name="name" required maxlength="60" placeholder="例如：工作计划、个人学习"></label><p id="project-error" class="form-error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary close-dialog">取消</button><button type="submit" class="primary">创建项目</button></div></form></dialog>
+  <dialog id="confirm-dialog"><h2>确认删除</h2><p id="confirm-message"></p><div class="dialog-actions"><button id="confirm-cancel" class="secondary">取消</button><button id="confirm-delete" class="danger">删除</button></div></dialog>
+  <div id="toast" role="status" hidden></div>
+</body>
+</html>

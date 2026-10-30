@@ -28,6 +28,7 @@ class StoreTests(unittest.TestCase):
     def test_validation(self):
         for payload in ({'title': ''}, {'title': 'a', 'status': 'invalid'},
                         {'title': 'a', 'due_date': '2026-02-30'},
+                        {'title': 'a', 'due_date': False},
                         {'title': 'a', 'project_id': 999},
                         {'title': 'a', 'project_id': True}):
             with self.subTest(payload=payload), self.assertRaises(ValidationError):

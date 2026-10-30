@@ -63,6 +63,16 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(rows[1][1], "'=1+1")
         self.assertEqual(rows[1][2], '中文,备注')
 
+    def test_interface_resources_and_private_paths(self):
+        for path, marker in [('/', '拾序'.encode()), ('/app.js', b'function openTask'),
+                             ('/style.css', b'@media')]:
+            with self.subTest(path=path):
+                status, body = self.request('GET', path)
+                self.assertEqual(status, 200)
+                self.assertIn(marker, body)
+        self.assertEqual(self.request('GET', '/data/tasks.db')[0], 404)
+        self.assertEqual(self.request('GET', '/.git/config')[0], 404)
+
 
 if __name__ == '__main__':
     unittest.main()

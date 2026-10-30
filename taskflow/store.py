@@ -123,7 +123,9 @@ class Store:
             raise ValidationError('任务状态无效')
         if priority not in ('low', 'medium', 'high'):
             raise ValidationError('优先级无效')
-        due = values.get('due_date') or None
+        due = values.get('due_date')
+        if due == '':
+            due = None
         if due is not None:
             try:
                 if not isinstance(due, str) or date.fromisoformat(due).isoformat() != due:
