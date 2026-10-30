@@ -1,6 +1,6 @@
 """Local-day completion trends and effort reports for active tasks."""
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from ..store import ValidationError
 
 
@@ -18,10 +18,11 @@ def summary(store, ids, payload, query):
     today = date.today()
     dates = [(today - timedelta(days=i)).isoformat() for i in reversed(range(days))]
     trend = {d: {'day': d, 'completed': 0, 'minutes': 0} for d in dates}
+    start_utc = datetime.combine(date.fromisoformat(dates[0]), time.min).astimezone().astimezone(timezone.utc).isoformat()
     seen = set()
     with store.connect() as db:
         totals = dict(db.execute("SELECT COUNT(*) AS total,COALESCE(SUM(status='done'),0) AS done,COALESCE(SUM(status='doing'),0) AS doing,COALESCE(SUM(status!='done' AND due_date<?),0) AS overdue,COALESCE(SUM(estimate_minutes),0) AS estimate_minutes FROM tasks WHERE deleted_at IS NULL", (today.isoformat(),)).fetchone())
-        for row in db.execute("SELECT a.* FROM activity a JOIN tasks t ON t.id=a.task_id WHERE t.deleted_at IS NULL AND a.action IN ('updated','bulk_status') AND a.created_at>=?", (dates[0] + 'T00:00:00',)):
+        for row in db.execute("SELECT a.* FROM activity a JOIN tasks t ON t.id=a.task_id WHERE t.deleted_at IS NULL AND a.action IN ('updated','bulk_status') AND a.created_at>=?", (start_utc,)):
             details = json.loads(row['details'])
             day = datetime.fromisoformat(row['created_at']).astimezone().date().isoformat()
             key = (day, row['task_id'])

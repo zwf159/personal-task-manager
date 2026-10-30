@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from taskflow.store import Store, ValidationError, NotFoundError, ConflictError
 from taskflow.features import Services, UNHANDLED, migrate
@@ -31,6 +32,15 @@ class FeatureTests(unittest.TestCase):
 
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
+
+    def test_completion_near_local_midnight_is_not_lost(self):
+        task = self.task()
+        local_start = datetime.combine(date.today(), time.min).astimezone()
+        timestamp = (local_start + timedelta(minutes=1)).astimezone(timezone.utc).isoformat()
+        with self.store.connect() as db:
+            db.execute('INSERT INTO activity(task_id,action,details,created_at) VALUES (?,?,?,?)',
+                       (task['id'], 'updated', '{"status":"done"}', timestamp))
+        self.assertEqual(self.call('GET', '/api/stats', query={'days': '1'})['trend'][0]['completed'], 1)
 
     def test_malformed_filter_types_and_large_ids_are_validation_errors(self):
         with self.assertRaises(ValidationError):
