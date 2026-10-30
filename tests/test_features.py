@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from taskflow.store import Store, ValidationError, NotFoundError
+from taskflow.store import Store, ValidationError, NotFoundError, ConflictError
 from taskflow.features import Services, UNHANDLED, migrate
 
 
@@ -31,6 +31,13 @@ class FeatureTests(unittest.TestCase):
 
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
+
+    def test_stale_edit_cannot_overwrite_newer_task(self):
+        task = self.task()
+        self.store.save_task({'title': '新版', 'expected_version': task['version']}, task['id'])
+        with self.assertRaises(ConflictError):
+            self.store.save_task({'title': '旧版', 'expected_version': task['version']}, task['id'])
+        self.assertEqual(self.store.get_task(task['id'])['title'], '新版')
 
     def test_activity_is_atomic_with_task_lifecycle(self):
         task = self.task()

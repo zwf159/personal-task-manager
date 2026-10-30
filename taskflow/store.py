@@ -14,6 +14,10 @@ class NotFoundError(LookupError):
     pass
 
 
+class ConflictError(ValueError):
+    pass
+
+
 def text(value, label, limit, required=False):
     if not isinstance(value, str):
         raise ValidationError(f"{label}必须是文本")
@@ -52,6 +56,7 @@ class Store:
         from .features import migrate
         migrate(self, 'task-recycle-bin', ['ALTER TABLE tasks ADD COLUMN deleted_at TEXT'])
         migrate(self, 'activity-log', ['CREATE TABLE activity(id INTEGER PRIMARY KEY,task_id INTEGER,action TEXT NOT NULL,details TEXT NOT NULL,created_at TEXT NOT NULL)'])
+        migrate(self, 'task-version', ['ALTER TABLE tasks ADD COLUMN version INTEGER NOT NULL DEFAULT 1'])
 
     @contextmanager
     def connect(self):
@@ -123,6 +128,16 @@ class Store:
             raise ValidationError('项目编号无效')
         now = datetime.now(timezone.utc).isoformat()
         with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if task_id is not None:
+                current = db.execute('SELECT version FROM tasks WHERE id=? AND deleted_at IS NULL', (task_id,)).fetchone()
+                if not current:
+                    raise NotFoundError('任务不存在')
+                expected = payload.get('expected_version', existing['version'])
+                if type(expected) is not int:
+                    raise ValidationError('任务版本必须是整数')
+                if expected != current['version']:
+                    raise ConflictError('任务已被其他窗口修改，请刷新后再编辑')
             if project is not None and not db.execute('SELECT id FROM projects WHERE id=?', (project,)).fetchone():
                 raise ValidationError('所选项目不存在')
             params = (title, notes, project, status, priority, due, now)
@@ -130,7 +145,7 @@ class Store:
                 cursor = db.execute('INSERT INTO tasks(title,notes,project_id,status,priority,due_date,updated_at,created_at) VALUES (?,?,?,?,?,?,?,?)', (*params, now))
                 task_id = cursor.lastrowid
             else:
-                db.execute('UPDATE tasks SET title=?,notes=?,project_id=?,status=?,priority=?,due_date=?,updated_at=? WHERE id=?', (*params, task_id))
+                db.execute('UPDATE tasks SET title=?,notes=?,project_id=?,status=?,priority=?,due_date=?,updated_at=?,version=version+1 WHERE id=?', (*params, task_id))
             changes = {k: v for k, v in dict(zip(('title', 'notes', 'project_id', 'status', 'priority', 'due_date'), params[:6])).items() if existing.get(k) != v}
             if changes or not existing:
                 self.record(db, task_id, 'updated' if existing else 'created', changes)

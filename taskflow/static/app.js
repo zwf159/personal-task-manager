@@ -160,6 +160,7 @@ async function submitForm(event, kind) {
   const data = Object.fromEntries(new FormData(form));
   const id = data.id;
   delete data.id;
+  if (kind === 'task' && id) data.expected_version = state.tasks.find(t => t.id === Number(id))?.version;
   if (kind === 'task') data.project_id = data.project_id ? Number(data.project_id) : null;
   try {
     await api(`/api/${kind === 'task' ? 'tasks' : 'projects'}${id ? `/${id}` : ''}`, id ? 'PATCH' : 'POST', data);

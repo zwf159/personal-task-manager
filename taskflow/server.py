@@ -7,7 +7,7 @@ import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
-from .store import NotFoundError, Store, ValidationError
+from .store import ConflictError, NotFoundError, Store, ValidationError
 from .features import Services, UNHANDLED
 
 STATIC = Path(__file__).parent / 'static'
@@ -117,6 +117,8 @@ def make_server(database, port=8765):
                 self.send(400, {'error': str(exc)})
             except NotFoundError as exc:
                 self.send(404, {'error': str(exc)})
+            except ConflictError as exc:
+                self.send(409, {'error': str(exc)})
             except (BrokenPipeError, ConnectionResetError, TimeoutError):
                 pass
             except Exception:
