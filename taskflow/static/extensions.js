@@ -36,6 +36,7 @@ for (const name of [
   "rules",
   "bundles",
   "diagnostics",
+  "portable",
 ]) {
   const style = document.createElement("link");
   style.rel = "stylesheet";

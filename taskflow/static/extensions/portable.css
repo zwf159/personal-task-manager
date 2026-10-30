@@ -1,0 +1,258 @@
+.portable-panel {
+  width: min(1000px, calc(100% - 24px));
+}
+.portable-inspector {
+  border: 1px solid #d9e5de;
+  border-radius: 9px;
+  padding: 16px;
+  margin-top: 24px;
+}
+.portable-inspector-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.portable-inspector-toolbar input {
+  min-width: 150px;
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #d5dfd8;
+  border-radius: 5px;
+}
+.portable-inspector-toolbar select {
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #d5dfd8;
+  border-radius: 5px;
+  max-width: 100%;
+}
+.portable-columns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  font-size: 11px;
+}
+.portable-columns input {
+  accent-color: #376d55;
+}
+.portable-breadcrumb {
+  font-size: 11px;
+  color: #7a8d81;
+}
+.portable-row-count {
+  font-size: 12px;
+  color: #4f6a59;
+}
+.portable-grid-scroll {
+  overflow-x: auto;
+  border: 1px solid #e0e8df;
+}
+.portable-record-table {
+  min-width: 550px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.portable-record-table th {
+  background: #eff5ef;
+  text-align: left;
+  padding: 10px;
+  white-space: nowrap;
+}
+.portable-record-table td {
+  padding: 8px 10px;
+  border-top: 1px solid #e4ebe2;
+  max-width: 190px;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+.portable-record-table .secondary {
+  padding: 5px 8px;
+  min-height: 27px;
+  font-size: 10px;
+}
+.portable-record-detail {
+  margin-top: 18px;
+}
+.portable-record-detail:empty {
+  display: none;
+}
+.portable-definition {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  border-top: 1px solid #e1e9df;
+  font-size: 12px;
+}
+.portable-definition dt {
+  margin: 0;
+  padding: 11px;
+  font-family: ui-monospace, monospace;
+  color: #657e6a;
+}
+.portable-definition dd {
+  margin: 0;
+  padding: 11px;
+  border-bottom: 1px solid #edf1e9;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.portable-definition .secondary {
+  display: block;
+  margin-top: 9px;
+  font-size: 10px;
+  padding: 5px 8px;
+  min-height: 27px;
+}
+.portable-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.portable-content {
+  min-width: 0;
+  padding-bottom: 18px;
+}
+.portable-content h3 {
+  margin-top: 18px;
+  color: #345c59;
+  font-size: 17px;
+}
+.portable-help {
+  font-size: 12px;
+  color: #6b7f7d;
+  line-height: 1.9;
+}
+.portable-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 16px 0;
+}
+.portable-table th {
+  background: #f2f7f6;
+  color: #516d66;
+}
+.portable-table td,
+.portable-table th {
+  border: 1px solid #dfe9e5;
+  text-align: left;
+  padding: 10px 14px;
+}
+.portable-table td:last-child {
+  width: 110px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.portable-table tr:nth-child(2n) td {
+  background: #fbfdfb;
+}
+.portable-content .action-strip {
+  margin-top: 18px;
+}
+.portable-status {
+  color: #416d5d;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.portable-status:empty {
+  display: none;
+}
+.portable-error {
+  color: #a14f46;
+  padding: 12px;
+  background: #fff3ef;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.portable-error:empty {
+  display: none;
+}
+.portable-policy {
+  padding: 14px;
+  border-left: 3px solid #6b9a86;
+  background: #f2f8f3;
+  font-size: 12px;
+}
+.portable-warning {
+  color: #96703c;
+  font-size: 12px;
+  padding: 8px 0;
+}
+.portable-success {
+  background: #eaf5ee;
+  padding: 18px;
+  border-radius: 8px;
+  color: #416b52;
+}
+.portable-digest {
+  font:
+    11px ui-monospace,
+    monospace;
+  word-break: break-all;
+}
+.portable-file {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  margin: 18px 0;
+  border: 1px dashed #9ab6ab;
+  border-radius: 8px;
+  background: #f9fcf9;
+}
+.portable-prefix {
+  display: block;
+  font-size: 12px;
+  color: #6b7f76;
+  margin-bottom: 18px;
+}
+.portable-prefix input {
+  display: block;
+  border: 1px solid #d4dfd8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  width: min(100%, 360px);
+}
+.portable-progress-label {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #72887a;
+}
+.portable-content progress {
+  height: 10px;
+  margin-top: 18px;
+}
+.portable-content .detail-line {
+  align-items: start;
+}
+.portable-content .inline-form {
+  margin-bottom: 24px;
+}
+.portable-content .detail-section {
+  margin-top: 28px;
+}
+.portable-content .detail-section h3 {
+  font-size: 14px;
+}
+@media (max-width: 720px) {
+  .portable-table td,
+  .portable-table th {
+    padding: 9px;
+  }
+  .portable-content .detail-line {
+    flex-wrap: wrap;
+  }
+  .portable-content .line-content {
+    flex-basis: 100%;
+  }
+  .portable-tabs .secondary {
+    flex: 1;
+    padding: 9px;
+  }
+  .portable-content .inline-form label {
+    flex-basis: 100%;
+  }
+}

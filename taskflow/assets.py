@@ -12,6 +12,7 @@ EXTENSIONS = (
     "rules",
     "bundles",
     "diagnostics",
+    "portable",
 )
 CORE_SCRIPTS = (
     "app",
@@ -23,6 +24,7 @@ CORE_SCRIPTS = (
     "selection",
     "views",
     "extensions",
+    "portable-browser",
 )
 
 
