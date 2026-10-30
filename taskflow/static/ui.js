@@ -1,5 +1,10 @@
 'use strict';
 const UI = {
+  confirm(title, message, action) {
+    const panel = UI.panel(title);
+    panel.body.append(element('p', '', message), UI.button('取消', () => panel.dialog.close()),
+      UI.button('确认', async () => {await action(); panel.dialog.close();}));
+  },
   button(label, action, className = 'secondary') {
     const button = element('button', className, label);
     button.type = 'button';
