@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_template_snapshot_survives_source_deletion(self):
+        t = self.task('每周复盘')
+        self.call('POST', f"/api/tasks/{t['id']}/checklist", {'title': '总结'})
+        template = self.call('POST', '/api/templates', {'task_id': t['id']})
+        self.store.delete_task(t['id'])
+        created = self.call('POST', f"/api/templates/{template['id']}/apply", {})
+        self.assertEqual(created['title'], '每周复盘')
+        self.assertEqual(len(self.call('GET', f"/api/tasks/{created['id']}/checklist")), 1)
+
     def test_csv_preview_import_rollback_and_duplicate_detection(self):
         content = '任务,状态\n第一项,todo\n无效,wrong\n'
         preview = self.call('POST', '/api/import/csv/preview', {'csv': content})
