@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_due_reminder_snooze_and_dismiss(self):
+        t = self.task()
+        reminder = self.call('POST', f"/api/tasks/{t['id']}/reminders", {'remind_at': '2020-01-01T08:00:00+08:00'})
+        self.assertEqual(len(self.call('GET', '/api/reminders')), 1)
+        self.call('PATCH', f"/api/reminders/{reminder['id']}", {'action': 'snooze', 'minutes': 10})
+        self.assertEqual(self.call('GET', '/api/reminders'), [])
+        with self.assertRaises(ValidationError):
+            self.call('POST', f"/api/tasks/{t['id']}/reminders", {'remind_at': '2026-10-30T09:00:00'})
+
     def test_template_snapshot_survives_source_deletion(self):
         t = self.task('每周复盘')
         self.call('POST', f"/api/tasks/{t['id']}/checklist", {'title': '总结'})
