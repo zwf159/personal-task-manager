@@ -1,4 +1,5 @@
 import tempfile
+import sqlite3
 import unittest
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
@@ -32,6 +33,24 @@ class FeatureTests(unittest.TestCase):
 
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
+
+    def test_first_version_database_is_upgraded_without_data_loss(self):
+        old_path = Path(self.temp.name) / 'old.db'
+        old = sqlite3.connect(old_path)
+        try:
+            old.executescript('''
+                CREATE TABLE projects(id INTEGER PRIMARY KEY,name TEXT NOT NULL UNIQUE);
+                CREATE TABLE tasks(id INTEGER PRIMARY KEY,title TEXT NOT NULL,notes TEXT NOT NULL DEFAULT '',project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,status TEXT NOT NULL,priority TEXT NOT NULL,due_date TEXT,created_at TEXT NOT NULL,updated_at TEXT NOT NULL);
+                INSERT INTO projects VALUES (1,'旧项目');
+                INSERT INTO tasks VALUES (1,'旧任务','旧备注',1,'todo','high',NULL,'2026-10-30','2026-10-30');
+            ''')
+        finally:
+            old.close()
+        upgraded = Store(old_path)
+        services = Services(upgraded)
+        self.assertEqual(upgraded.get_task(1)['notes'], '旧备注')
+        self.assertEqual(upgraded.get_task(1)['version'], 1)
+        self.assertEqual(services.dispatch('GET', '/api/search')['total'], 1)
 
     def test_completion_near_local_midnight_is_not_lost(self):
         task = self.task()
