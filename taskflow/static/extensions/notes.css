@@ -1,0 +1,6 @@
+.notes-panel textarea { min-height: 230px; line-height: 1.8; }
+.notes-panel .inline-form label:has(textarea) { flex-basis: 100%; }
+.note-card { background: #fbfcff; }
+.note-category { color: #7685a0; font-size: 11px; }
+.notes-panel .workspace-body { max-height: 160px; overflow: auto; }
+@media (max-width: 720px) { .notes-panel textarea { min-height: 180px; } }
