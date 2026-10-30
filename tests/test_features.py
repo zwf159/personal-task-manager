@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_csv_preview_import_rollback_and_duplicate_detection(self):
+        content = '任务,状态\n第一项,todo\n无效,wrong\n'
+        preview = self.call('POST', '/api/import/csv/preview', {'csv': content})
+        self.assertEqual((preview['valid'], len(preview['errors'])), (1, 1))
+        with self.assertRaises(ValidationError):
+            self.call('POST', '/api/import/csv', {'csv': content, 'confirm': True})
+        self.assertEqual(self.store.tasks(), [])
+        content = '任务,备注\n第一项,"中文,备注"\n第一项,重复\n'
+        result = self.call('POST', '/api/import/csv', {'csv': content, 'confirm': True})
+        self.assertEqual(result, {'imported': 1, 'skipped': 1})
+
     def test_restore_verifies_hash_and_creates_undo_backup(self):
         self.task('原始任务')
         backup = self.call('POST', '/api/backups', {})

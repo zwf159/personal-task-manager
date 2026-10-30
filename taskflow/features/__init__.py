@@ -5,7 +5,7 @@ import threading
 from dataclasses import dataclass
 from ..store import ValidationError
 
-MODULES = ['projects', 'trash', 'labels', 'checklists', 'comments', 'search', 'views', 'activity', 'bulk', 'dependencies', 'time_entries', 'focus', 'duplication', 'recurrence', 'analytics', 'backups']
+MODULES = ['projects', 'trash', 'labels', 'checklists', 'comments', 'search', 'views', 'activity', 'bulk', 'dependencies', 'time_entries', 'focus', 'duplication', 'recurrence', 'analytics', 'backups', 'csv_import']
 UNHANDLED = object()
 
 
