@@ -32,6 +32,16 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_journal_edit_keeps_creation_timestamp(self):
+        task = self.task()
+        path = f"/api/tasks/{task['id']}/comments"
+        note = self.call('POST', path, {'body': '今天开始'})
+        edited = self.call('PATCH', f"{path}/{note['id']}", {'body': '补充内容'})
+        self.assertEqual(edited['created_at'], note['created_at'])
+        self.assertEqual(self.call('GET', path)[0]['body'], '补充内容')
+        self.call('DELETE', f"{path}/{note['id']}")
+        self.assertEqual(self.call('GET', path), [])
+
     def test_checklist_cannot_modify_another_tasks_item(self):
         a, b = self.task(), self.task()
         path = f"/api/tasks/{a['id']}/checklist"
