@@ -1,0 +1,9 @@
+[project]
+name = "personal-task-manager"
+version = "0.1.0"
+description = "A local-first personal task manager with a Chinese web interface"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.taskflow]
+test-command = "python -m unittest discover -s tests -v"
