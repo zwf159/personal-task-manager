@@ -13,13 +13,18 @@ async function loadExecution() {
 function drawFocus() {
   const target = $('#focus-status');
   target.hidden = !runningFocus;
-  if (!runningFocus) return;
+  if (!runningFocus) {target.replaceChildren(); target.dataset.focusId = ''; return;}
   const elapsed = Math.max(0, Math.floor((Date.now() - Date.parse(runningFocus.started_at)) / 1000));
   const remaining = Math.max(0, runningFocus.planned_minutes * 60 - elapsed);
-  target.replaceChildren(element('span', '', `专注：${runningFocus.title} · 剩余 ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`), UI.button(remaining ? '结束专注' : '记录本次专注', async () => {
+  if (target.dataset.focusId !== String(runningFocus.id)) {
+    target.dataset.focusId = runningFocus.id;
+    target.replaceChildren(element('span'), UI.button('结束专注', async () => {
     await api(`/api/focus/${runningFocus.id}/stop`, 'POST', {});
     await loadExecution(); await refresh(); toast('专注记录已保存');
-  }));
+    }));
+  }
+  target.firstChild.textContent = `专注：${runningFocus.title} · 剩余 ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+  target.lastChild.textContent = remaining ? '结束专注' : '记录本次专注';
 }
 
 async function openReminders() {

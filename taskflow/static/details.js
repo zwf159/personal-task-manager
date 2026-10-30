@@ -6,7 +6,7 @@ async function openDetails(id) {
     const [task, checklist, comments, labels, assigned, links, activity] = await Promise.all(
       [base, `${base}/checklist`, `${base}/comments`, '/api/labels', `${base}/labels`, `${base}/links`, `${base}/activity`].map(path => api(path)));
     if (!panel.dialog.isConnected) return;
-    panel.body.replaceChildren(element('h2', '', task.title), element('p', 'detail-notes', task.notes));
+    panel.body.replaceChildren(element('h2', '', `#${task.id} · ${task.title}`), element('p', 'detail-notes', task.notes));
     const actions = element('div', 'action-strip');
     actions.append(UI.button('编辑基本信息', () => {panel.dialog.close(); openTask(task);}),
       UI.button('复制任务', async () => {await api(`${base}/duplicate`, 'POST', {}); await refresh(); toast('已复制任务');}));

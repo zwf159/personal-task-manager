@@ -1,4 +1,5 @@
 'use strict';
+let panelSequence = 0;
 const UI = {
   confirm(title, message, action) {
     const panel = UI.panel(title);
@@ -15,13 +16,17 @@ const UI = {
     return button;
   },
   panel(title) {
+    const previousFocus = document.activeElement;
     const dialog = element('dialog', 'feature-panel');
     const header = element('div', 'dialog-heading');
-    header.append(element('h2', '', title), UI.button('关闭', () => dialog.close()));
+    const heading = element('h2', '', title);
+    heading.id = `feature-panel-${++panelSequence}`;
+    dialog.setAttribute('aria-labelledby', heading.id);
+    header.append(heading, UI.button('关闭', () => dialog.close()));
     const body = element('div', 'panel-body');
     dialog.append(header, body);
     document.body.append(dialog);
-    dialog.addEventListener('close', () => dialog.remove(), {once: true});
+    dialog.addEventListener('close', () => {dialog.remove(); if (previousFocus?.isConnected) previousFocus.focus();}, {once: true});
     dialog.showModal();
     return {dialog, body};
   },
@@ -43,6 +48,7 @@ const UI = {
       const wrapper = element('label', '', field.label);
       const input = element(field.options ? 'select' : field.type === 'textarea' ? 'textarea' : 'input');
       input.name = field.name;
+      input.setAttribute('aria-label', field.label);
       if (field.options) for (const [value, title] of field.options) input.add(new Option(title, value));
       else if (field.type !== 'textarea') input.type = field.type || 'text';
       input.required = field.required !== false;
@@ -54,14 +60,17 @@ const UI = {
       form.append(wrapper);
     }
     const button = element('button', 'primary', label);
+    const errorMessage = element('p', 'form-error inline-error');
+    errorMessage.setAttribute('role', 'alert');
     button.type = 'submit';
-    form.append(button);
+    form.append(button, errorMessage);
     form.onsubmit = async event => {
       event.preventDefault();
       if (button.disabled) return;
       button.disabled = true;
+      errorMessage.textContent = '';
       try {await submit(Object.fromEntries(new FormData(form)));}
-      catch (error) {toast(error.message);}
+      catch (error) {errorMessage.textContent = error.message; toast(error.message);}
       finally {button.disabled = false;}
     };
     return form;
