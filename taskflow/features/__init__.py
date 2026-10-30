@@ -1,10 +1,11 @@
 """Feature registry shared by HTTP and command-line clients."""
 import importlib
 import re
+import threading
 from dataclasses import dataclass
 from ..store import ValidationError
 
-MODULES = ['projects', 'trash', 'labels', 'checklists', 'comments', 'search', 'views', 'activity', 'bulk', 'dependencies', 'time_entries', 'focus', 'duplication', 'recurrence', 'analytics']
+MODULES = ['projects', 'trash', 'labels', 'checklists', 'comments', 'search', 'views', 'activity', 'bulk', 'dependencies', 'time_entries', 'focus', 'duplication', 'recurrence', 'analytics', 'backups']
 UNHANDLED = object()
 
 
@@ -19,6 +20,7 @@ class Services:
     def __init__(self, store):
         self.store = store
         self.routes = []
+        self.lock = threading.RLock()
         for name in MODULES:
             module = importlib.import_module(f'.{name}', __package__)
             module.install(self)

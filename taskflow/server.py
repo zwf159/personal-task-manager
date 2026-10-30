@@ -112,7 +112,8 @@ def make_server(database, port=8765):
         def handle_request(self):
             self.connection.settimeout(10)
             try:
-                self.dispatch()
+                with services.lock:
+                    self.dispatch()
             except ValidationError as exc:
                 self.send(400, {'error': str(exc)})
             except NotFoundError as exc:

@@ -32,6 +32,13 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_backup_is_consistent_and_has_fingerprint(self):
+        self.task('备份内任务')
+        backup = self.call('POST', '/api/backups', {})
+        self.assertEqual(len(backup['sha256']), 64)
+        self.assertGreater(backup['bytes'], 0)
+        self.assertEqual(self.call('GET', '/api/backups')[0]['name'], backup['name'])
+
     def test_analytics_uses_active_tasks_and_unique_daily_completions(self):
         t = self.task()
         for status in ['done', 'todo', 'done']:
