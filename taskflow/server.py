@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 from .store import NotFoundError, Store, ValidationError
+from .features import Services, UNHANDLED
 
 STATIC = Path(__file__).parent / 'static'
 
@@ -26,6 +27,7 @@ def csv_bytes(tasks):
 
 def make_server(database, port=8765):
     store = Store(database)
+    services = Services(store)
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt, *args):
@@ -75,6 +77,10 @@ def make_server(database, port=8765):
             url = urlsplit(self.path)
             path = url.path
             filters = {k: v[0] for k, v in parse_qs(url.query).items()}
+            payload = self.payload() if self.command in ('POST', 'PATCH', 'PUT') else {}
+            result = services.dispatch(self.command, path, payload, filters)
+            if result is not UNHANDLED:
+                return self.send(201 if self.command == 'POST' else 200, result)
             if self.command == 'GET':
                 if path == '/api/tasks':
                     return self.send(200, store.tasks(filters))
@@ -90,14 +96,14 @@ def make_server(database, port=8765):
                     return self.send(200, (STATIC / name).read_bytes(), mime)
             if self.command == 'POST':
                 if path == '/api/tasks':
-                    return self.send(201, store.save_task(self.payload()))
+                    return self.send(201, store.save_task(payload))
                 if path == '/api/projects':
-                    return self.send(201, store.create_project(self.payload()))
+                    return self.send(201, store.create_project(payload))
             match = re.fullmatch(r'/api/(tasks|projects)/([1-9][0-9]*)', path)
             if match:
                 kind, item_id = match[1], int(match[2])
                 if self.command == 'PATCH' and kind == 'tasks':
-                    return self.send(200, store.save_task(self.payload(), item_id))
+                    return self.send(200, store.save_task(payload, item_id))
                 if self.command == 'DELETE':
                     (store.delete_task if kind == 'tasks' else store.delete_project)(item_id)
                     return self.send(200, {'ok': True})

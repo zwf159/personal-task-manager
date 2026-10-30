@@ -1,0 +1,33 @@
+import tempfile
+import unittest
+from pathlib import Path
+from taskflow.store import Store, ValidationError, NotFoundError
+from taskflow.features import Services, UNHANDLED, migrate
+
+
+class FeatureTests(unittest.TestCase):
+    def setUp(self):
+        Path('data').mkdir(exist_ok=True)
+        self.temp = tempfile.TemporaryDirectory(dir='data')
+        self.addCleanup(self.temp.cleanup)
+        self.store = Store(Path(self.temp.name) / 'tasks.db')
+        self.services = Services(self.store)
+
+    def call(self, method, path, payload=None, query=None):
+        result = self.services.dispatch(method, path, payload, query)
+        self.assertIsNot(result, UNHANDLED, path)
+        return result
+
+    def task(self, title='任务', **values):
+        return self.store.save_task({'title': title, **values})
+
+    def test_migration_is_atomic_and_idempotent(self):
+        migrate(self.store, 'test', ['CREATE TABLE sample(id INTEGER)'])
+        migrate(self.store, 'test', ['INVALID SQL'])
+        with self.assertRaises(Exception):
+            migrate(self.store, 'broken', ['CREATE TABLE failed(id INTEGER)', 'INVALID SQL'])
+        with self.store.connect() as db:
+            self.assertIsNone(db.execute("SELECT name FROM sqlite_master WHERE name='failed'").fetchone())
+
+    def test_unknown_routes_are_not_handled(self):
+        self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
