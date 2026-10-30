@@ -57,6 +57,9 @@ class Store:
         migrate(self, 'task-recycle-bin', ['ALTER TABLE tasks ADD COLUMN deleted_at TEXT'])
         migrate(self, 'activity-log', ['CREATE TABLE activity(id INTEGER PRIMARY KEY,task_id INTEGER,action TEXT NOT NULL,details TEXT NOT NULL,created_at TEXT NOT NULL)'])
         migrate(self, 'task-version', ['ALTER TABLE tasks ADD COLUMN version INTEGER NOT NULL DEFAULT 1'])
+        migrate(self, 'project-metadata', [
+            "ALTER TABLE projects ADD COLUMN description TEXT NOT NULL DEFAULT ''",
+            'ALTER TABLE projects ADD COLUMN archived INTEGER NOT NULL DEFAULT 0'])
 
     @contextmanager
     def connect(self):
@@ -78,10 +81,14 @@ class Store:
 
     def create_project(self, payload):
         name = text(payload.get('name', ''), '项目名称', 60, True)
+        description = text(payload.get('description', ''), '项目说明', 2000)
+        archived = payload.get('archived', False)
+        if type(archived) is not bool:
+            raise ValidationError('归档状态必须为布尔值')
         try:
             with self.connect() as db:
-                cursor = db.execute("INSERT INTO projects(name) VALUES (?)", (name,))
-                return {'id': cursor.lastrowid, 'name': name, 'task_count': 0}
+                cursor = db.execute('INSERT INTO projects(name,description,archived) VALUES (?,?,?)', (name, description, archived))
+                return {'id': cursor.lastrowid, 'name': name, 'description': description, 'archived': int(archived), 'task_count': 0}
         except sqlite3.IntegrityError as exc:
             raise ValidationError('项目名称已存在') from exc
 

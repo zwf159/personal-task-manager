@@ -50,6 +50,14 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(NotFoundError):
             self.store.get_task(task['id'])
 
+    def test_project_creation_retains_metadata_without_web_service(self):
+        project = self.store.create_project({'name': '新项目', 'description': '项目说明', 'archived': True})
+        saved = Store(self.store.path).projects()[0]
+        self.assertEqual(saved['description'], '项目说明')
+        self.assertEqual(saved['archived'], 1)
+        with self.assertRaises(ValidationError):
+            self.store.create_project({'name': '无效项目', 'archived': 'false'})
+
 
 if __name__ == '__main__':
     unittest.main()
