@@ -18,4 +18,5 @@ def restore(store, ids, payload, query):
         if not db.execute('UPDATE tasks SET deleted_at=NULL WHERE id=? AND deleted_at IS NOT NULL',
                           (ids['id'],)).rowcount:
             raise NotFoundError('回收站中没有此任务')
+        store.record(db, int(ids['id']), 'restored', {})
     return store.get_task(ids['id'])

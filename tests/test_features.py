@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_activity_is_atomic_with_task_lifecycle(self):
+        task = self.task()
+        self.store.save_task({'status': 'done'}, task['id'])
+        self.store.delete_task(task['id'])
+        self.call('POST', f"/api/tasks/{task['id']}/restore", {})
+        events = self.call('GET', f"/api/tasks/{task['id']}/activity")
+        self.assertEqual([e['action'] for e in events], ['restored', 'deleted', 'updated', 'created'])
+        self.assertEqual(events[2]['details'], {'status': 'done'})
+
     def test_saved_views_persist_and_validate_filters(self):
         self.call('POST', '/api/views', {'name': '紧急工作', 'filters': {'priority': 'high'}})
         again = Services(Store(self.store.path))

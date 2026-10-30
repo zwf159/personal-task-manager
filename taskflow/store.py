@@ -1,5 +1,6 @@
 """SQLite persistence and validation, independent of HTTP and the interface."""
 import sqlite3
+import json
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -50,6 +51,7 @@ class Store:
             """)
         from .features import migrate
         migrate(self, 'task-recycle-bin', ['ALTER TABLE tasks ADD COLUMN deleted_at TEXT'])
+        migrate(self, 'activity-log', ['CREATE TABLE activity(id INTEGER PRIMARY KEY,task_id INTEGER,action TEXT NOT NULL,details TEXT NOT NULL,created_at TEXT NOT NULL)'])
 
     @contextmanager
     def connect(self):
@@ -129,6 +131,9 @@ class Store:
                 task_id = cursor.lastrowid
             else:
                 db.execute('UPDATE tasks SET title=?,notes=?,project_id=?,status=?,priority=?,due_date=?,updated_at=? WHERE id=?', (*params, task_id))
+            changes = {k: v for k, v in dict(zip(('title', 'notes', 'project_id', 'status', 'priority', 'due_date'), params[:6])).items() if existing.get(k) != v}
+            if changes or not existing:
+                self.record(db, task_id, 'updated' if existing else 'created', changes)
         return self.get_task(task_id)
 
     def delete_task(self, task_id):
@@ -136,3 +141,9 @@ class Store:
             if not db.execute('UPDATE tasks SET deleted_at=? WHERE id=? AND deleted_at IS NULL',
                               (datetime.now(timezone.utc).isoformat(), task_id)).rowcount:
                 raise NotFoundError('任务不存在')
+            self.record(db, task_id, 'deleted', {})
+
+    @staticmethod
+    def record(db, task_id, action, details):
+        db.execute('INSERT INTO activity(task_id,action,details,created_at) VALUES (?,?,?,?)',
+                   (task_id, action, json.dumps(details, ensure_ascii=False), datetime.now(timezone.utc).isoformat()))
