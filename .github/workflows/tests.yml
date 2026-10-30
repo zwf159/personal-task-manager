@@ -16,6 +16,4 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - name: Check every browser script
         run: |
-          for script in taskflow/static/*.js; do
-            node --check "$script"
-          done
+          find taskflow/static -type f -name '*.js' -print0 | xargs -0 -n1 node --check
