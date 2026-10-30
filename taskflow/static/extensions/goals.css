@@ -1,8 +1,21 @@
-.goals-panel .goal-card { border-left: 4px solid #6b997b; }
-.goals-panel progress { height: 8px; margin: 8px 0 14px; }
-.goals-panel .workspace-metric { font-variant-numeric: tabular-nums; }
-.goals-panel .goal-card > .secondary { margin-top: 14px; }
+.goals-panel .goal-card {
+  border-left: 4px solid #6b997b;
+}
+.goals-panel progress {
+  height: 8px;
+  margin: 8px 0 14px;
+}
+.goals-panel .workspace-metric {
+  font-variant-numeric: tabular-nums;
+}
+.goals-panel .goal-card > .secondary {
+  margin-top: 14px;
+}
 @media (max-width: 720px) {
-  .goals-panel .detail-line { flex-wrap: wrap; }
-  .goals-panel .line-content { flex-basis: 100%; }
+  .goals-panel .detail-line {
+    flex-wrap: wrap;
+  }
+  .goals-panel .line-content {
+    flex-basis: 100%;
+  }
 }

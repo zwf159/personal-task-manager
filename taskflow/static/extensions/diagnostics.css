@@ -1,7 +1,24 @@
-.diagnostic-help { padding: 14px; border-radius: 7px; background: #f2f5f2; }
-.diagnostic-report.ok { border-top: 4px solid #67946e; }
-.diagnostic-report.warning { border-top: 4px solid #bf9d55; }
-.diagnostic-report.error { border-top: 4px solid #b76b65; }
-.diagnostics-panel .check-warning h3 { color: #947026; }
-.diagnostics-panel .check-error h3 { color: #a64c48; }
-.diagnostics-panel .line-content { font-family: ui-monospace, monospace; font-size: 11px; }
+.diagnostic-help {
+  padding: 14px;
+  border-radius: 7px;
+  background: #f2f5f2;
+}
+.diagnostic-report.ok {
+  border-top: 4px solid #67946e;
+}
+.diagnostic-report.warning {
+  border-top: 4px solid #bf9d55;
+}
+.diagnostic-report.error {
+  border-top: 4px solid #b76b65;
+}
+.diagnostics-panel .check-warning h3 {
+  color: #947026;
+}
+.diagnostics-panel .check-error h3 {
+  color: #a64c48;
+}
+.diagnostics-panel .line-content {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}

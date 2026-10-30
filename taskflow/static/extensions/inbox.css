@@ -1,5 +1,19 @@
-.inbox-panel .capture-card { background: #fffdf7; }
-.capture-source { color: #93876e; display: block; margin-bottom: 14px; }
-.inbox-panel .capture-card > .secondary { margin-top: 12px; }
-.inbox-panel .workspace-body { line-height: 1.9; }
-@media (max-width: 720px) { .inbox-panel .action-strip { gap: 6px; } }
+.inbox-panel .capture-card {
+  background: #fffdf7;
+}
+.capture-source {
+  color: #93876e;
+  display: block;
+  margin-bottom: 14px;
+}
+.inbox-panel .capture-card > .secondary {
+  margin-top: 12px;
+}
+.inbox-panel .workspace-body {
+  line-height: 1.9;
+}
+@media (max-width: 720px) {
+  .inbox-panel .action-strip {
+    gap: 6px;
+  }
+}
