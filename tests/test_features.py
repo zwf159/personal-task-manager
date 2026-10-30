@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_analytics_uses_active_tasks_and_unique_daily_completions(self):
+        t = self.task()
+        for status in ['done', 'todo', 'done']:
+            self.store.save_task({'status': status}, t['id'])
+        self.call('POST', f"/api/tasks/{t['id']}/time", {'minutes': 30})
+        report = self.call('GET', '/api/stats')
+        self.assertEqual(report['trend'][-1]['completed'], 1)
+        self.assertEqual(report['logged_minutes'], 30)
+        self.store.delete_task(t['id'])
+        self.assertEqual(self.call('GET', '/api/stats')['total'], 0)
+
     def test_recurrence_generates_one_next_occurrence(self):
         t = self.task(due_date='2028-02-28')
         self.call('POST', f"/api/tasks/{t['id']}/recurrence", {'days': 1})
