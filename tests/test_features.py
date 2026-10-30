@@ -32,6 +32,16 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_dependencies_prevent_cycles_and_premature_completion(self):
+        a, b = self.task('前置'), self.task('后续')
+        self.call('POST', f"/api/tasks/{b['id']}/dependencies", {'depends_on': a['id']})
+        with self.assertRaises(ValidationError):
+            self.call('POST', f"/api/tasks/{a['id']}/dependencies", {'depends_on': b['id']})
+        with self.assertRaises(ValidationError):
+            self.store.save_task({'status': 'done'}, b['id'])
+        self.store.save_task({'status': 'done'}, a['id'])
+        self.assertEqual(self.store.save_task({'status': 'done'}, b['id'])['status'], 'done')
+
     def test_bulk_operation_rolls_back_invalid_selection(self):
         task = self.task()
         with self.assertRaises(NotFoundError):

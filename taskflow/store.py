@@ -140,6 +140,9 @@ class Store:
                     raise ConflictError('任务已被其他窗口修改，请刷新后再编辑')
             if project is not None and not db.execute('SELECT id FROM projects WHERE id=?', (project,)).fetchone():
                 raise ValidationError('所选项目不存在')
+            if status == 'done' and task_id is not None:
+                from .features.dependencies import ensure_ready
+                ensure_ready(db, task_id)
             params = (title, notes, project, status, priority, due, now)
             if task_id is None:
                 cursor = db.execute('INSERT INTO tasks(title,notes,project_id,status,priority,due_date,updated_at,created_at) VALUES (?,?,?,?,?,?,?,?)', (*params, now))

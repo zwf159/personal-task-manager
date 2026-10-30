@@ -37,6 +37,9 @@ def apply(store, ids, payload, query):
             if not db.execute('SELECT 1 FROM tasks WHERE id=? AND deleted_at IS NULL', (task_id,)).fetchone():
                 raise NotFoundError('选择中包含不存在的任务，未修改任何任务')
         for task_id in selection:
+            if action == 'status' and value == 'done':
+                from .dependencies import ensure_ready
+                ensure_ready(db, task_id, selection)
             db.execute(f'UPDATE tasks SET {column}=?,updated_at=?,version=version+1 WHERE id=?', (value, now, task_id))
             store.record(db, task_id, 'bulk_' + action, {column: value})
     return {'updated': len(selection)}
