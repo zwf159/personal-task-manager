@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_duplicate_copies_plan_but_resets_completed_work(self):
+        t = self.task(status='done', notes='模板内容')
+        path = f"/api/tasks/{t['id']}/checklist"
+        item = self.call('POST', path, {'title': '子步骤'})
+        self.call('PATCH', path + f"/{item['id']}", {'done': True})
+        copy = self.call('POST', f"/api/tasks/{t['id']}/duplicate", {})
+        self.assertEqual(copy['status'], 'todo')
+        self.assertEqual(copy['notes'], t['notes'])
+        copied_items = self.call('GET', f"/api/tasks/{copy['id']}/checklist")
+        self.assertEqual(copied_items[0]['done'], 0)
+
     def test_focus_timer_is_single_and_stop_is_idempotent(self):
         t = self.task()
         session = self.call('POST', '/api/focus', {'task_id': t['id']})
