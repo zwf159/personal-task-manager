@@ -91,6 +91,7 @@ def make_server(database, port=8765):
                 files = {'/': ('index.html', 'text/html; charset=utf-8'),
                          '/ui.js': ('ui.js', 'text/javascript; charset=utf-8'),
                          '/details.js': ('details.js', 'text/javascript; charset=utf-8'),
+                         '/planning.js': ('planning.js', 'text/javascript; charset=utf-8'),
                          '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                          '/style.css': ('style.css', 'text/css; charset=utf-8')}
                 if path in files:

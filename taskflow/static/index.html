@@ -8,6 +8,7 @@
   <script src="/app.js" defer></script>
   <script src="/ui.js" defer></script>
   <script src="/details.js" defer></script>
+  <script src="/planning.js" defer></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -25,6 +26,8 @@
   </aside>
   <main>
     <header><div class="eyebrow">让每一步，都有方向</div><div class="title-line"><div><h1 id="view-title">全部任务</h1><p id="subtitle">把想做的事，变成完成的事。</p></div><button id="new-task" class="primary">＋ 新建任务</button></div></header>
+    <div id="tools" class="action-strip tools" aria-label="工作空间工具"></div>
+    <div id="focus-status" class="focus-status" hidden></div>
     <section class="stats" aria-label="任务统计">
       <article><span>全部任务</span><strong id="stat-total">0</strong><small>记录每一个想法</small></article>
       <article><span>进行中</span><strong id="stat-doing">0</strong><small>专注眼前的一步</small></article>
