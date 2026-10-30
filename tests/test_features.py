@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_labels_assignment_is_atomic(self):
+        task = self.task()
+        label = self.call('POST', '/api/labels', {'name': '重要'})
+        path = f"/api/tasks/{task['id']}/labels"
+        self.call('POST', path, {'label_ids': [label['id']]})
+        with self.assertRaises(ValidationError):
+            self.call('POST', path, {'label_ids': [999]})
+        self.assertEqual(self.call('GET', path)[0]['name'], '重要')
+        self.call('DELETE', f"/api/labels/{label['id']}")
+        self.assertEqual(self.call('GET', path), [])
+
     def test_recycle_restore_preserves_original_task(self):
         task = self.task(notes='不能丢失')
         self.store.delete_task(task['id'])
