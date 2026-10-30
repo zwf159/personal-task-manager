@@ -41,7 +41,7 @@ def build(filters):
         clauses.append("t.due_date" + ('=?' if view == 'today' else '<?') + " AND t.status!='done'")
         args.append(date.today().isoformat())
     sort = filters.get('sort', 'due')
-    if sort not in SORTS:
+    if not isinstance(sort, str) or sort not in SORTS:
         raise ValidationError('排序方式无效')
     return ' AND '.join(clauses), args, SORTS[sort]
 

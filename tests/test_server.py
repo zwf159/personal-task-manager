@@ -73,6 +73,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(self.request('GET', '/data/tasks.db')[0], 404)
         self.assertEqual(self.request('GET', '/.git/config')[0], 404)
 
+    def test_extended_routes_and_validation_status_codes(self):
+        self.assertEqual(self.request('GET', '/api/tasks/999999999999999999999')[0], 400)
+        for path in ['/ui.js', '/details.js', '/planning.js', '/data.js', '/reports.js', '/selection.js', '/views.js']:
+            self.assertEqual(self.request('GET', path)[0], 200)
+        status, body = self.request('POST', '/api/tasks', {'title': '版本测试'})
+        task = json.loads(body)
+        self.request('PATCH', f"/api/tasks/{task['id']}", {'title': '已更新'})
+        self.assertEqual(self.request('PATCH', f"/api/tasks/{task['id']}", {'title': '过期', 'expected_version': task['version']})[0], 409)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -26,8 +26,10 @@ def listing(store, ids, payload, query):
 
 def create(store, ids, payload, query):
     task_id, other = int(ids['id']), positive(payload.get('depends_on'))
-    store.get_task(task_id)
-    store.get_task(other)
+    task = store.get_task(task_id)
+    prerequisite = store.get_task(other)
+    if task['status'] == 'done' and prerequisite['status'] != 'done':
+        raise ValidationError('已完成的任务不能添加未完成的前置任务')
     with store.connect() as db:
         db.execute('BEGIN IMMEDIATE')
         cycle = db.execute('WITH RECURSIVE chain(id) AS (SELECT ? UNION SELECT d.depends_on FROM dependencies d JOIN chain c ON d.task_id=c.id) SELECT 1 FROM chain WHERE id=?', (other, task_id)).fetchone()

@@ -18,7 +18,7 @@ def timestamp(value):
         if dt.tzinfo is None:
             raise ValueError()
         return dt.astimezone(timezone.utc).isoformat()
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         raise ValidationError('提醒时间必须包含时区') from None
 
 

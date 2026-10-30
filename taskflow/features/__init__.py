@@ -32,6 +32,9 @@ class Services:
         for route in self.routes:
             match = route.pattern.fullmatch(path)
             if method == route.method and match:
+                for value in match.groupdict().values():
+                    if value.isdecimal() and (len(value) > 10 or int(value) > 2147483647):
+                        raise ValidationError('资源编号超出支持范围')
                 return route.handler(self.store, match.groupdict(), payload or {}, query or {})
         return UNHANDLED
 

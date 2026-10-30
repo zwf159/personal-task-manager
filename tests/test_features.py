@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_malformed_filter_types_and_large_ids_are_validation_errors(self):
+        with self.assertRaises(ValidationError):
+            self.call('POST', '/api/views', {'name': '无效', 'filters': {'sort': []}})
+        with self.assertRaises(ValidationError):
+            self.call('GET', '/api/tasks/99999999999999999999999/comments')
+        done, todo = self.task(status='done'), self.task()
+        with self.assertRaises(ValidationError):
+            self.call('POST', f"/api/tasks/{done['id']}/dependencies", {'depends_on': todo['id']})
+
     def test_reference_links_reject_active_content_and_credentials(self):
         t = self.task()
         path = f"/api/tasks/{t['id']}/links"

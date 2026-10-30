@@ -108,6 +108,8 @@ def make_server(database, port=8765):
                     return self.send(201, store.create_project(payload))
             match = re.fullmatch(r'/api/(tasks|projects)/([1-9][0-9]*)', path)
             if match:
+                if len(match[2]) > 10 or int(match[2]) > 2147483647:
+                    raise ValidationError('资源编号超出支持范围')
                 kind, item_id = match[1], int(match[2])
                 if self.command == 'GET' and kind == 'tasks':
                     return self.send(200, store.get_task(item_id))
