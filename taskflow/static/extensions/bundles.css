@@ -1,0 +1,5 @@
+.bundle-card { border-left: 4px solid #829f9e; }
+.bundle-warning { background: #edf6f4; padding: 14px; border-radius: 8px; line-height: 1.8; }
+.bundles-panel .bundle-card > .secondary { margin-top: 14px; }
+.bundles-panel .detail-line { color: #6d827c; }
+@media (max-width: 720px) { .bundles-panel .inline-form label { flex-basis: 100%; } }

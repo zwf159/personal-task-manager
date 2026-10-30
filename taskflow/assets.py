@@ -1,7 +1,7 @@
 """Explicit static resource manifest; database paths are never public."""
 from pathlib import PurePosixPath
 
-EXTENSIONS = ('goals', 'habits', 'inbox', 'notes', 'planner', 'reviews', 'rules')
+EXTENSIONS = ('goals', 'habits', 'inbox', 'notes', 'planner', 'reviews', 'rules', 'bundles')
 CORE_SCRIPTS = ('app', 'ui', 'details', 'planning', 'data', 'reports', 'selection', 'views', 'extensions')
 
 
