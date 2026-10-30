@@ -14,3 +14,4 @@ class PlannerTests(StoreCase):
 
     def test_invalid_time_and_date_are_rejected(self):
         with self.assertRaises(ValidationError):self.call('POST','/api/planner',{'title':'a','start_time':'25:00','end_time':'26:00'})
+        with self.assertRaises(ValidationError):self.call('GET','/api/planner/week',query={'day':'9999-12-31'})

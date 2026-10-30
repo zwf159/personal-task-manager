@@ -10,6 +10,17 @@ from taskflow.server import make_server
 
 
 class ApiTests(unittest.TestCase):
+    def test_workspace_routes_assets_and_boundaries(self):
+        from taskflow.assets import EXTENSIONS
+        for name in EXTENSIONS:
+            for suffix in ('js','css'):
+                self.assertEqual(self.request('GET',f'/extensions/{name}.{suffix}')[0],200)
+        for path in ['/api/goals','/api/habits','/api/inbox','/api/notes','/api/planner','/api/reviews','/api/rules','/api/project-bundles','/api/diagnostics']:
+            self.assertEqual(self.request('GET',path)[0],200)
+        self.assertEqual(self.request('GET','/extensions/../store.py')[0],404)
+        self.assertEqual(self.request('GET','/api/planner/week?day=9999-12-31')[0],400)
+        self.assertEqual(self.request('POST','/api/notes',{'title':'测试笔记'})[0],201)
+
     def setUp(self):
         Path('data').mkdir(exist_ok=True)
         self.temp = tempfile.TemporaryDirectory(dir='data')

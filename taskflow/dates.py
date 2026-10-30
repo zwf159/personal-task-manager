@@ -1,6 +1,7 @@
 """Calendar calculations shared by habits, planning and reviews."""
 from datetime import date, datetime, timedelta, timezone
 from .validation import day
+from .store import ValidationError
 
 
 def utc_now():
@@ -14,7 +15,10 @@ def week_start(value):
 
 def date_span(start, count):
     first = date.fromisoformat(day(start))
-    return [(first + timedelta(days=i)).isoformat() for i in range(count)]
+    try:
+        return [(first + timedelta(days=i)).isoformat() for i in range(count)]
+    except OverflowError:
+        raise ValidationError('日期范围超出支持的日历年份') from None
 
 
 def streak(days, today=None):

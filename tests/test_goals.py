@@ -19,3 +19,11 @@ class GoalTests(StoreCase):
         goal=self.call('POST','/api/goals',{'title':'目标'})
         changed=self.call('PATCH',f"/api/goals/{goal['id']}",{'archived':True})
         self.assertTrue(changed['archived'])
+
+    def test_deleted_task_can_be_detached_from_goal(self):
+        goal=self.call('POST','/api/goals',{'title':'目标'})
+        task=self.task();path=f"/api/goals/{goal['id']}/tasks"
+        self.call('POST',path,{'task_id':task['id']})
+        self.store.delete_task(task['id'])
+        result=self.call('POST',path,{'task_id':task['id'],'attach':False})
+        self.assertEqual(result['tasks'],[])

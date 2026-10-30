@@ -19,7 +19,8 @@ def save(store, ids, payload, query):
 def link(store, ids, payload, query):
     task_id = integer(payload.get('task_id'), '任务编号', 1, 2147483647)
     attach = flag(payload.get('attach', True), '关联状态')
-    store.get_task(task_id)
+    if attach:
+        store.get_task(task_id)
     with store.connect() as db:
         repo.get(db, ids['id'])
         if attach:
