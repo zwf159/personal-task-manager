@@ -32,6 +32,13 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_saved_views_persist_and_validate_filters(self):
+        self.call('POST', '/api/views', {'name': '紧急工作', 'filters': {'priority': 'high'}})
+        again = Services(Store(self.store.path))
+        self.assertEqual(again.dispatch('GET', '/api/views')[0]['filters'], {'priority': 'high'})
+        with self.assertRaises(ValidationError):
+            self.call('POST', '/api/views', {'name': '无效', 'filters': {'sort': 'unknown'}})
+
     def test_unicode_search_pagination_and_literal_wildcards(self):
         for title in ['Straße', '100% 完成', '第三项']:
             self.task(title)
