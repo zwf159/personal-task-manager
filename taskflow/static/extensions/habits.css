@@ -1,0 +1,7 @@
+.habits-panel .habit-card { border-top: 3px solid #8aa879; }
+.habit-streak { color: #587347; font-weight: 600; }
+.habits-panel .habit-card > .secondary { margin-top: 12px; }
+.habits-panel .inline-form { background: #f6f8f3; padding: 12px; border-radius: 7px; }
+@media (max-width: 720px) {
+  .habits-panel .inline-form label { flex-basis: 100%; }
+}

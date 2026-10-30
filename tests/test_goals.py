@@ -1,8 +1,8 @@
-from test_features import FeatureTests
+from support import StoreCase
 from taskflow.store import ValidationError
 
 
-class GoalTests(FeatureTests):
+class GoalTests(StoreCase):
     def test_progress_is_driven_by_linked_active_tasks(self):
         goal = self.call('POST','/api/goals',{'title':'年度阅读','target':2})
         task = self.task()
