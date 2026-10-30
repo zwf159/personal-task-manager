@@ -152,6 +152,9 @@ class Store:
             changes = {k: v for k, v in dict(zip(('title', 'notes', 'project_id', 'status', 'priority', 'due_date'), params[:6])).items() if existing.get(k) != v}
             if changes or not existing:
                 self.record(db, task_id, 'updated' if existing else 'created', changes)
+            if existing and existing.get('recurrence_days') and existing['status'] != 'done' and status == 'done':
+                from .features.recurrence import advance
+                advance(db, self, task_id)
         return self.get_task(task_id)
 
     def delete_task(self, task_id):

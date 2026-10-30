@@ -42,4 +42,7 @@ def apply(store, ids, payload, query):
                 ensure_ready(db, task_id, selection)
             db.execute(f'UPDATE tasks SET {column}=?,updated_at=?,version=version+1 WHERE id=?', (value, now, task_id))
             store.record(db, task_id, 'bulk_' + action, {column: value})
+            if action == 'status' and value == 'done':
+                from .recurrence import advance
+                advance(db, store, task_id)
     return {'updated': len(selection)}

@@ -32,6 +32,16 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_recurrence_generates_one_next_occurrence(self):
+        t = self.task(due_date='2028-02-28')
+        self.call('POST', f"/api/tasks/{t['id']}/recurrence", {'days': 1})
+        self.store.save_task({'status': 'done'}, t['id'])
+        self.store.save_task({'status': 'todo'}, t['id'])
+        self.store.save_task({'status': 'done'}, t['id'])
+        tasks = self.store.tasks()
+        self.assertEqual(len(tasks), 2)
+        self.assertEqual(next(x for x in tasks if x['id'] != t['id'])['due_date'], '2028-02-29')
+
     def test_duplicate_copies_plan_but_resets_completed_work(self):
         t = self.task(status='done', notes='模板内容')
         path = f"/api/tasks/{t['id']}/checklist"
