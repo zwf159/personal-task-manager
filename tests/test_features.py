@@ -31,3 +31,13 @@ class FeatureTests(unittest.TestCase):
 
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
+
+    def test_project_rename_archive_and_duplicate(self):
+        p = self.store.create_project({'name': '旧项目'})
+        self.store.create_project({'name': '冲突名称'})
+        task = self.task(project_id=p['id'])
+        updated = self.call('PATCH', f"/api/projects/{p['id']}", {'name': '新项目', 'archived': True})
+        self.assertEqual(updated['archived'], 1)
+        self.assertEqual(self.store.get_task(task['id'])['project_id'], p['id'])
+        with self.assertRaises(ValidationError):
+            self.call('PATCH', f"/api/projects/{p['id']}", {'name': '冲突名称'})
