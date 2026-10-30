@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_effort_estimates_and_time_ledger(self):
+        t = self.task()
+        base = f"/api/tasks/{t['id']}"
+        self.call('PATCH', base + '/estimate', {'minutes': 120})
+        for minutes in [20, 40]:
+            self.call('POST', base + '/time', {'minutes': minutes})
+        report = self.call('GET', base + '/time')
+        self.assertEqual((report['total_minutes'], report['estimate_minutes']), (60, 120))
+        with self.assertRaises(ValidationError):
+            self.call('POST', base + '/time', {'minutes': -1})
+
     def test_dependencies_prevent_cycles_and_premature_completion(self):
         a, b = self.task('前置'), self.task('后续')
         self.call('POST', f"/api/tasks/{b['id']}/dependencies", {'depends_on': a['id']})
