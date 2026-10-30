@@ -89,6 +89,8 @@ def make_server(database, port=8765):
                 if path == '/api/export.csv':
                     return self.send(200, csv_bytes(store.tasks(filters)), 'text/csv; charset=utf-8', True)
                 files = {'/': ('index.html', 'text/html; charset=utf-8'),
+                         '/ui.js': ('ui.js', 'text/javascript; charset=utf-8'),
+                         '/details.js': ('details.js', 'text/javascript; charset=utf-8'),
                          '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                          '/style.css': ('style.css', 'text/css; charset=utf-8')}
                 if path in files:
@@ -102,6 +104,8 @@ def make_server(database, port=8765):
             match = re.fullmatch(r'/api/(tasks|projects)/([1-9][0-9]*)', path)
             if match:
                 kind, item_id = match[1], int(match[2])
+                if self.command == 'GET' and kind == 'tasks':
+                    return self.send(200, store.get_task(item_id))
                 if self.command == 'PATCH' and kind == 'tasks':
                     return self.send(200, store.save_task(payload, item_id))
                 if self.command == 'DELETE':

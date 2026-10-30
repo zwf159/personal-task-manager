@@ -104,6 +104,9 @@ function taskRow(task) {
   remove.setAttribute('aria-label', `删除任务：${task.title}`);
   remove.onclick = () => confirmDelete(`将“${task.title}”移入回收站？之后可以恢复。`, () => mutate(`/api/tasks/${task.id}`, 'DELETE'));
   row.append(check, content, status, remove);
+  const detail = element('button', 'secondary detail-button', '详情');
+  detail.onclick = () => openDetails(task.id);
+  row.insertBefore(detail, status);
   return row;
 }
 
