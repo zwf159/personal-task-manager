@@ -32,6 +32,16 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_focus_timer_is_single_and_stop_is_idempotent(self):
+        t = self.task()
+        session = self.call('POST', '/api/focus', {'task_id': t['id']})
+        with self.assertRaises(ConflictError):
+            self.call('POST', '/api/focus', {'task_id': t['id']})
+        stopped = self.call('POST', f"/api/focus/{session['id']}/stop", {})
+        self.assertIsNotNone(stopped['ended_at'])
+        self.assertEqual(stopped, self.call('POST', f"/api/focus/{session['id']}/stop", {}))
+        self.assertEqual(self.call('GET', f"/api/tasks/{t['id']}/time")['total_minutes'], 0)
+
     def test_effort_estimates_and_time_ledger(self):
         t = self.task()
         base = f"/api/tasks/{t['id']}"
