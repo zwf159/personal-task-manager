@@ -16,7 +16,7 @@ const Workspace = {
   async changed() {await refresh();},
 };
 $('#tools').append(UI.button('个人工作台', () => Workspace.open()));
-for (const name of ['goals', 'habits']) {
+for (const name of ['goals', 'habits', 'inbox']) {
   const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = `/extensions/${name}.css`; document.head.append(style);
   const script = document.createElement('script'); script.src = `/extensions/${name}.js`; script.async = false;
   script.onerror = () => toast(`工作台模块加载失败：${name}`);
