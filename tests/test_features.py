@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_reference_links_reject_active_content_and_credentials(self):
+        t = self.task()
+        path = f"/api/tasks/{t['id']}/links"
+        for url in ['javascript:alert(1)', 'https://user:password@example.com', 'file:///tmp/a']:
+            with self.assertRaises(ValidationError):
+                self.call('POST', path, {'url': url})
+        link = self.call('POST', path, {'url': 'https://example.com/docs'})
+        self.assertEqual(link['title'], 'example.com')
+
     def test_due_reminder_snooze_and_dismiss(self):
         t = self.task()
         reminder = self.call('POST', f"/api/tasks/{t['id']}/reminders", {'remind_at': '2020-01-01T08:00:00+08:00'})
