@@ -37,7 +37,7 @@ async function openBulk() {
     selectedTasks.clear(); panel.dialog.close(); await refresh(); toast('批量操作已完成');
   }
   panel.body.append(UI.form([{name: 'status', label: '改为状态', options: ['todo', 'doing', 'done'].map(v => [v, labels[v]])}], data => apply('status', data.status), '更新状态'));
-  panel.body.append(UI.form([{name: 'project', label: '移动到项目', options: [['', '未分组'], ...state.projects.map(p => [p.id, p.name])]}], data => apply('project', data.project ? Number(data.project) : null), '移动任务'));
+  panel.body.append(UI.form([{name: 'project', label: '移动到项目', required: false, options: [['', '未分组'], ...state.projects.map(p => [p.id, p.name])]}], data => apply('project', data.project ? Number(data.project) : null), '移动任务'));
   panel.body.append(UI.button('移入回收站', () => UI.confirm('批量移入回收站', `将 ${ids.length} 项任务移入回收站，之后可以恢复。`, () => apply('delete'))));
 }
 document.addEventListener('taskflow:refresh', drawSelection);
