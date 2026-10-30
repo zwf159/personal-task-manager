@@ -1,0 +1,17 @@
+.extension-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.extension-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+  margin: 14px 0;
+}
+.extension-card h3 { font-size: 16px; margin: 0 0 10px; }
+.extension-card p { font-size: 12px; line-height: 1.8; overflow-wrap: anywhere; }
+.extension-card .action-strip { margin-top: 12px; }
+.workspace-empty { color: var(--muted); font-size: 13px; padding: 20px 0; }
+.workspace-metric { font-size: 12px; color: var(--green); }
+.workspace-body { white-space: pre-wrap; overflow-wrap: anywhere; }

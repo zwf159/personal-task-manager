@@ -24,6 +24,10 @@ class Services:
         for name in MODULES:
             module = importlib.import_module(f'.{name}', __package__)
             module.install(self)
+        from ..assets import EXTENSIONS
+        for name in EXTENSIONS:
+            module = importlib.import_module(f'..extensions.{name}.routes', __package__)
+            module.install(self)
 
     def route(self, method, pattern, handler):
         self.routes.append(Route(method, re.compile(pattern), handler))

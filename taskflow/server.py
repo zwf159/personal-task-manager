@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 from .store import ConflictError, NotFoundError, Store, ValidationError
 from .features import Services, UNHANDLED
+from .assets import resource
 
 STATIC = Path(__file__).parent / 'static'
 
@@ -88,18 +89,9 @@ def make_server(database, port=8765):
                     return self.send(200, store.projects())
                 if path == '/api/export.csv':
                     return self.send(200, csv_bytes(store.tasks(filters)), 'text/csv; charset=utf-8', True)
-                files = {'/': ('index.html', 'text/html; charset=utf-8'),
-                         '/ui.js': ('ui.js', 'text/javascript; charset=utf-8'),
-                         '/details.js': ('details.js', 'text/javascript; charset=utf-8'),
-                         '/planning.js': ('planning.js', 'text/javascript; charset=utf-8'),
-                         '/data.js': ('data.js', 'text/javascript; charset=utf-8'),
-                         '/reports.js': ('reports.js', 'text/javascript; charset=utf-8'),
-                         '/selection.js': ('selection.js', 'text/javascript; charset=utf-8'),
-                         '/views.js': ('views.js', 'text/javascript; charset=utf-8'),
-                         '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
-                         '/style.css': ('style.css', 'text/css; charset=utf-8')}
-                if path in files:
-                    name, mime = files[path]
+                asset = resource(path)
+                if asset:
+                    name, mime = asset
                     return self.send(200, (STATIC / name).read_bytes(), mime)
             if self.command == 'POST':
                 if path == '/api/tasks':
