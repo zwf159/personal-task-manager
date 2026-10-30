@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_restore_verifies_hash_and_creates_undo_backup(self):
+        self.task('原始任务')
+        backup = self.call('POST', '/api/backups', {})
+        self.task('备份之后')
+        with self.assertRaises(ValidationError):
+            self.call('POST', '/api/backups/restore', {**backup, 'confirm': True, 'sha256': 'bad'})
+        self.assertEqual(len(self.store.tasks()), 2)
+        restored = self.call('POST', '/api/backups/restore', {**backup, 'confirm': True})
+        self.assertEqual(len(self.store.tasks()), 1)
+        self.assertNotEqual(restored['safety_backup']['name'], backup['name'])
+
     def test_backup_is_consistent_and_has_fingerprint(self):
         self.task('备份内任务')
         backup = self.call('POST', '/api/backups', {})

@@ -1,5 +1,6 @@
 """Consistent SQLite backups stored beside the database, never served as files."""
 import hashlib
+import hmac
 import re
 import sqlite3
 import uuid
@@ -12,6 +13,7 @@ NAME = re.compile(r'[0-9a-f]{32}\.sqlite3')
 def install(s):
     s.route('GET', r'/api/backups', listing)
     s.route('POST', r'/api/backups', create)
+    s.route('POST', r'/api/backups/restore', restore)
 
 
 def directory(store):
@@ -63,3 +65,31 @@ def resolve(store, name):
     if not path.is_file() or path.is_symlink():
         raise NotFoundError('备份不存在')
     return path
+
+
+def restore(store, ids, payload, query):
+    if payload.get('confirm') is not True:
+        raise ValidationError('恢复会替换当前数据，请明确确认')
+    path = resolve(store, payload.get('name'))
+    expected = payload.get('sha256')
+    if not isinstance(expected, str) or not hmac.compare_digest(metadata(path)['sha256'], expected):
+        raise ValidationError('备份校验值不匹配，请刷新备份列表')
+    source = sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)
+    try:
+        source.execute('PRAGMA trusted_schema=OFF')
+        if source.execute('PRAGMA quick_check').fetchone()[0] != 'ok' or source.execute('PRAGMA foreign_key_check').fetchone():
+            raise ValidationError('备份数据库完整性检查失败')
+        schema_sql = "SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name"
+        backup_schema = source.execute(schema_sql).fetchall()
+        with store.connect() as current:
+            current_schema = [tuple(r) for r in current.execute(schema_sql)]
+        if current_schema != backup_schema:
+            raise ValidationError('备份结构与当前版本不同，不能直接恢复')
+        safety = create(store, {}, {}, {})
+        with store.connect() as destination:
+            source.backup(destination)
+        return {'ok': True, 'safety_backup': safety}
+    except sqlite3.DatabaseError:
+        raise ValidationError('备份文件不是可读取的 SQLite 数据库') from None
+    finally:
+        source.close()
