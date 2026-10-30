@@ -32,6 +32,14 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_bulk_operation_rolls_back_invalid_selection(self):
+        task = self.task()
+        with self.assertRaises(NotFoundError):
+            self.call('POST', '/api/tasks/bulk', {'ids': [task['id'], 999], 'action': 'status', 'value': 'done'})
+        self.assertEqual(self.store.get_task(task['id'])['status'], 'todo')
+        self.call('POST', '/api/tasks/bulk', {'ids': [task['id']], 'action': 'status', 'value': 'done'})
+        self.assertEqual(self.store.get_task(task['id'])['status'], 'done')
+
     def test_stale_edit_cannot_overwrite_newer_task(self):
         task = self.task()
         self.store.save_task({'title': '新版', 'expected_version': task['version']}, task['id'])
