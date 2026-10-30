@@ -55,6 +55,7 @@ class Store:
     def connect(self):
         db = sqlite3.connect(self.path, timeout=10)
         db.row_factory = sqlite3.Row
+        db.create_function('casefold', 1, lambda v: v.casefold() if v else '', deterministic=True)
         db.execute("PRAGMA foreign_keys = ON")
         try:
             with db:
@@ -83,29 +84,10 @@ class Store:
                 raise NotFoundError('项目不存在')
 
     def tasks(self, filters=None):
-        filters = filters or {}
-        clauses, args = ['t.deleted_at IS NULL'], []
-        if filters.get('q'):
-            # Escape LIKE wildcards so user queries match literal text.
-            query = filters['q'].replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
-            clauses.append("(t.title LIKE ? ESCAPE '\\' OR t.notes LIKE ? ESCAPE '\\')")
-            args.extend([f'%{query}%', f'%{query}%'])
-        for key in ('status', 'priority', 'project_id'):
-            if filters.get(key):
-                clauses.append(f't.{key}=?')
-                args.append(filters[key])
-        if filters.get('view') == 'today':
-            clauses.append("t.due_date=? AND t.status!='done'")
-            args.append(date.today().isoformat())
-        elif filters.get('view') == 'overdue':
-            clauses.append("t.due_date<? AND t.status!='done'")
-            args.append(date.today().isoformat())
-        sql = 'SELECT t.*, p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id'
-        if clauses:
-            sql += ' WHERE ' + ' AND '.join(clauses)
-        sql += " ORDER BY (t.status='done'), (t.due_date IS NULL), t.due_date, CASE t.priority WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END, t.id DESC"
+        from .query import build
+        where, args, order = build(filters or {})
         with self.connect() as db:
-            return [dict(row) for row in db.execute(sql, args)]
+            return [dict(r) for r in db.execute('SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE ' + where + ' ORDER BY ' + order, args)]
 
     def get_task(self, task_id):
         with self.connect() as db:

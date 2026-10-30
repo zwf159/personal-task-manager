@@ -32,6 +32,17 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_unicode_search_pagination_and_literal_wildcards(self):
+        for title in ['Straße', '100% 完成', '第三项']:
+            self.task(title)
+        found = self.call('GET', '/api/search', query={'q': 'STRASSE'})
+        self.assertEqual(found['total'], 1)
+        pages = [self.call('GET', '/api/search', query={'limit': '1', 'offset': str(i), 'sort': 'oldest'}) for i in range(3)]
+        self.assertEqual(len({p['items'][0]['id'] for p in pages}), 3)
+        self.assertEqual(self.store.tasks({'q': '%'})[0]['title'], '100% 完成')
+        with self.assertRaises(ValidationError):
+            self.call('GET', '/api/search', query={'sort': 'DROP TABLE tasks'})
+
     def test_journal_edit_keeps_creation_timestamp(self):
         task = self.task()
         path = f"/api/tasks/{task['id']}/comments"
