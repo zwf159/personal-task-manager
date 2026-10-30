@@ -94,6 +94,7 @@ def make_server(database, port=8765):
                          '/planning.js': ('planning.js', 'text/javascript; charset=utf-8'),
                          '/data.js': ('data.js', 'text/javascript; charset=utf-8'),
                          '/reports.js': ('reports.js', 'text/javascript; charset=utf-8'),
+                         '/selection.js': ('selection.js', 'text/javascript; charset=utf-8'),
                          '/app.js': ('app.js', 'text/javascript; charset=utf-8'),
                          '/style.css': ('style.css', 'text/css; charset=utf-8')}
                 if path in files:

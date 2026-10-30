@@ -86,6 +86,7 @@ function render() {
 
 function taskRow(task) {
   const row = element('article', `task-row ${task.status === 'done' ? 'completed' : ''}`);
+  row.dataset.taskId = task.id;
   const check = element('button', 'check', task.status === 'done' ? '✓' : '');
   check.setAttribute('aria-label', `${task.status === 'done' ? '重新打开' : '完成'}任务：${task.title}`);
   check.onclick = () => mutate(`/api/tasks/${task.id}`, 'PATCH', {status: task.status === 'done' ? 'todo' : 'done'});
