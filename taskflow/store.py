@@ -48,6 +48,8 @@ class Store:
                 CREATE INDEX IF NOT EXISTS tasks_project ON tasks(project_id);
                 CREATE INDEX IF NOT EXISTS tasks_due ON tasks(due_date);
             """)
+        from .features import migrate
+        migrate(self, 'task-recycle-bin', ['ALTER TABLE tasks ADD COLUMN deleted_at TEXT'])
 
     @contextmanager
     def connect(self):
@@ -64,7 +66,7 @@ class Store:
         with self.connect() as db:
             return [dict(row) for row in db.execute(
                 "SELECT p.*, COUNT(t.id) AS task_count FROM projects p "
-                "LEFT JOIN tasks t ON p.id=t.project_id GROUP BY p.id ORDER BY p.id")]
+                "LEFT JOIN tasks t ON p.id=t.project_id AND t.deleted_at IS NULL GROUP BY p.id ORDER BY p.id")]
 
     def create_project(self, payload):
         name = text(payload.get('name', ''), '项目名称', 60, True)
@@ -82,7 +84,7 @@ class Store:
 
     def tasks(self, filters=None):
         filters = filters or {}
-        clauses, args = [], []
+        clauses, args = ['t.deleted_at IS NULL'], []
         if filters.get('q'):
             # Escape LIKE wildcards so user queries match literal text.
             query = filters['q'].replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
@@ -107,7 +109,7 @@ class Store:
 
     def get_task(self, task_id):
         with self.connect() as db:
-            row = db.execute('SELECT * FROM tasks WHERE id=?', (task_id,)).fetchone()
+            row = db.execute('SELECT * FROM tasks WHERE id=? AND deleted_at IS NULL', (task_id,)).fetchone()
         if row is None:
             raise NotFoundError('任务不存在')
         return dict(row)
@@ -149,5 +151,6 @@ class Store:
 
     def delete_task(self, task_id):
         with self.connect() as db:
-            if not db.execute('DELETE FROM tasks WHERE id=?', (task_id,)).rowcount:
+            if not db.execute('UPDATE tasks SET deleted_at=? WHERE id=? AND deleted_at IS NULL',
+                              (datetime.now(timezone.utc).isoformat(), task_id)).rowcount:
                 raise NotFoundError('任务不存在')

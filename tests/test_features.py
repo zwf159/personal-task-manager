@@ -32,6 +32,15 @@ class FeatureTests(unittest.TestCase):
     def test_unknown_routes_are_not_handled(self):
         self.assertIs(self.services.dispatch('GET', '/not-found'), UNHANDLED)
 
+    def test_recycle_restore_preserves_original_task(self):
+        task = self.task(notes='不能丢失')
+        self.store.delete_task(task['id'])
+        self.assertEqual(self.store.tasks(), [])
+        self.assertEqual(self.call('GET', '/api/trash')[0]['id'], task['id'])
+        restored = self.call('POST', f"/api/tasks/{task['id']}/restore", {})
+        self.assertEqual(restored['notes'], '不能丢失')
+        self.assertEqual(self.call('GET', '/api/trash'), [])
+
     def test_project_rename_archive_and_duplicate(self):
         p = self.store.create_project({'name': '旧项目'})
         self.store.create_project({'name': '冲突名称'})
