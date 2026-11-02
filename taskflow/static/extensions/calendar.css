@@ -1,0 +1,127 @@
+.calendar-panel {
+  width: min(1400px, 96vw);
+}
+.calendar-toolbar,
+.calendar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+.calendar-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 160px;
+}
+.calendar-control input,
+.calendar-control select {
+  width: 100%;
+}
+.calendar-actions {
+  align-items: center;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(125px, 1fr));
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.6rem;
+}
+.calendar-day {
+  min-height: 180px;
+  padding: 0.55rem;
+  border: 1px solid var(--border, #d7dfe8);
+  border-radius: 0.5rem;
+  background: var(--surface, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.calendar-day-title {
+  font-weight: 700;
+  padding: 0.4rem;
+  background: transparent;
+  color: #173b62;
+  border: 0;
+  text-align: left;
+}
+.calendar-day meter {
+  width: 100%;
+  height: 0.7rem;
+}
+.calendar-today {
+  border: 2px solid #2563eb;
+}
+.calendar-outside {
+  background: #f1f5f9;
+}
+.calendar-slot,
+.calendar-due {
+  padding: 0.45rem;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  border-radius: 0.3rem;
+}
+.calendar-slot {
+  background: #e7f0ff;
+  color: #163e6c;
+  border: 1px solid #b7cfee;
+  cursor: grab;
+}
+.calendar-slot:active {
+  cursor: grabbing;
+}
+.calendar-due {
+  background: #fff4dc;
+  color: #653d00;
+  border: 1px solid #e6cd95;
+}
+.calendar-unavailable {
+  border-style: dashed;
+  opacity: 0.8;
+}
+.calendar-done {
+  text-decoration: line-through;
+}
+.calendar-month .calendar-day {
+  min-height: 140px;
+}
+.calendar-warning {
+  color: #8f260d;
+  border-left: 3px solid #d86738;
+  padding-left: 0.6rem;
+  overflow-wrap: anywhere;
+}
+.calendar-preview {
+  margin: 1rem 0;
+  max-height: 55vh;
+  overflow: auto;
+}
+.calendar-preview .detail-section {
+  padding: 0.65rem;
+}
+.calendar-status {
+  font-weight: 600;
+}
+.calendar-grid button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+@media (max-width: 800px) {
+  .calendar-grid {
+    grid-template-columns: repeat(7, 160px);
+  }
+  .calendar-panel {
+    width: 98vw;
+    padding: 0.65rem;
+  }
+  .calendar-toolbar,
+  .calendar-actions {
+    gap: 0.4rem;
+  }
+}

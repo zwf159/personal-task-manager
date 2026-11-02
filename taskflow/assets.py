@@ -13,6 +13,7 @@ EXTENSIONS = (
     "bundles",
     "diagnostics",
     "portable",
+    "calendar",
 )
 CORE_SCRIPTS = (
     "app",
