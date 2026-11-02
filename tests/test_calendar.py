@@ -249,6 +249,17 @@ class CalendarTests(StoreCase):
         self.assertTrue(parse(invalid)["errors"])
         cross_day = self.ics(end="20261103T120000")
         self.assertTrue(parse(cross_day)["errors"])
+        excessive_duration = self.ics().replace(
+            "DTEND:20261102T120000", "DURATION:PT" + "9" * 5000 + "M"
+        )
+        self.assertTrue(parse(excessive_duration)["errors"])
+        content = self.ics()
+        event = content[
+            content.index("BEGIN:VEVENT") : content.index("END:VEVENT")
+            + len("END:VEVENT")
+        ]
+        same_uid = parse(content.replace("END:VCALENDAR", event + "\r\nEND:VCALENDAR"))
+        self.assertEqual(len(same_uid["errors"]), 1)
 
     def test_month_filter_preserves_capacity_and_due_export_is_explicit(self):
         project = self.store.create_project({"name": "筛选项目"})
@@ -273,3 +284,6 @@ class CalendarTests(StoreCase):
         )
         self.assertEqual(output["deadlines"], 1)
         self.assertEqual(len(self.view()["days"]), 7)
+        for invalid in (True, 1.5, {}, []):
+            with self.subTest(project_id=invalid), self.assertRaises(ValidationError):
+                self.view(project_id=invalid)

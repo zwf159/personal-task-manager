@@ -29,11 +29,13 @@ def calendar_options(query):
     view = choice(query.get("view", "week"), ("week", "month"), "日历视图")
     project = query.get("project_id")
     if project not in (None, ""):
+        if type(project) not in (str, int):
+            raise ValidationError("项目编号无效")
         try:
             project = int(project)
         except (TypeError, ValueError):
             raise ValidationError("项目编号无效") from None
-        integer(project, "项目编号", 1)
+        integer(project, "项目编号", 1, 2147483647)
     else:
         project = None
     return {

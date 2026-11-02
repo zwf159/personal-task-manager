@@ -4,6 +4,8 @@
 
 写入需 `Content-Type: application/json` 与 `X-Taskflow-Request: 1`；Origin（若存在）及 Host 必须匹配本机地址。无 CORS。JSON 对象请求体最多 64 KB。资源 ID 支持 1–2147483647。
 
+JSON 数据包迁移与日历 API 的请求示例、指纹确认流程和边界见 [迁移与日历手册](TRANSFER_CALENDAR.md)。
+
 创建型 POST 返回 201，其余成功 200；校验失败 400、来源拒绝 403、资源不存在 404、编辑或计时冲突 409、内部异常 500。
 
 ## 基础任务

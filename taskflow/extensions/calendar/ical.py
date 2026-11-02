@@ -85,6 +85,13 @@ def unfold(content):
     return result
 
 
+def to_local(value):
+    try:
+        return value.astimezone()
+    except (ValueError, OverflowError, OSError):
+        raise ValidationError("事件时间转换到本地时区后超出支持范围") from None
+
+
 def parse_time(value, parameters):
     if parameters.get("VALUE") == "DATE" or re.fullmatch(r"\d{8}", value):
         return None
@@ -101,7 +108,7 @@ def parse_time(value, parameters):
     if match[2]:
         if zone:
             raise ValidationError("UTC 时间不能同时声明 TZID")
-        return parsed.replace(tzinfo=timezone.utc).astimezone()
+        return to_local(parsed.replace(tzinfo=timezone.utc))
     if zone:
         try:
             parsed = parsed.replace(tzinfo=ZoneInfo(zone))
@@ -109,12 +116,12 @@ def parse_time(value, parameters):
             raise ValidationError("本机不支持此 TZID，请改为 UTC 导出日历") from None
         if parsed.utcoffset() != parsed.replace(fold=1).utcoffset():
             raise ValidationError("此本地时间处于夏令时转换边界，请使用明确 UTC 时间")
-        return parsed.astimezone()
-    return parsed.astimezone()
+        return to_local(parsed)
+    return to_local(parsed)
 
 
 def duration(value):
-    match = re.fullmatch(r"PT(?:(\d+)H)?(?:(\d+)M)?", value)
+    match = re.fullmatch(r"PT(?:(\d{1,4})H)?(?:(\d{1,4})M)?", value)
     if not match or not any(match.groups()):
         raise ValidationError("仅支持 PTnHnM 格式的持续时间")
     minutes = int(match[1] or 0) * 60 + int(match[2] or 0)
