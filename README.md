@@ -117,3 +117,8 @@ python -m taskflow.cli data backup
 ```
 
 全局 `--database 路径` 放在命令组前面。CSV 导出默认拒绝覆盖已有文件，显式 `--overwrite` 才覆盖；恢复需要备份名称、SHA-256 和 `--confirm`。
+
+## 贡献者
+
+- Exile（[@zwf159](https://github.com/zwf159)）：需求方向与维护
+- Claude（[@claude](https://github.com/claude)）：协作开发
